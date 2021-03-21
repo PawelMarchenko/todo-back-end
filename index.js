@@ -39,10 +39,6 @@ app.get("/list-items", (request, response, next) => {
     .catch((err) => console.log(err));
 });
 
-// function info(infoObj) {
-//     console.log(infoObj)
-// }
-
 app.post(
   "/create-item",
   [
@@ -56,7 +52,7 @@ app.post(
     console.log(payload);
     db.todos.create(payload).then((info) => {
       console.log(info);
-      res.json({ status: "Ok" });
+      res.json({ status: "Ok", item: info });
     });
 
     // let data = ''
@@ -79,7 +75,42 @@ app.post(
   }
 );
 
-app.patch("/todos/:id", (req, res) => {
+app.delete(
+  "/delete-item",
+  [
+    (req, res, next) => {
+      console.log("TEST MIDDLEWARE");
+      next();
+    },
+  ],
+  (req, res, next) => {
+    const where = {};
+    const payload = req.body;
+    const body = req.body;
+    console.log(payload);
+    const id = body.id;
+    const zalupaKonskaja = {
+      where: { id: body.id },
+    };
+    if (body.id) {
+      where.id = body.id;
+    }
+    console.log(where.id);
+    console.log(zalupaKonskaja);
+    db.todos
+      .destroy(zalupaKonskaja)
+      .then((info) => {
+        console.log(info);
+        res.json({ status: "Ok" });
+      })
+      .catch((votGovno) => {
+        res.status(500).json({ message: votGovno.message });
+      });
+  }
+);
+
+app.patch("/todo/:id", (req, res) => {
+  
   const searchId = req.params.id;
   const payload = req.body;
   console.log({ searchId, payload });
@@ -91,6 +122,10 @@ app.patch("/todos/:id", (req, res) => {
     })
     .then(() => {
       res.json({ status: "ok" });
+    }).catch((err) => {
+      res.status(500).json({
+        message: err.message,
+      });
     });
 });
 
